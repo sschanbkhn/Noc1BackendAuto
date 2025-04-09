@@ -1,0 +1,18 @@
+add-migration InitDB -o Infrastructure/migrations
+update-database
+
+dotnet ef dbcontext scaffold "Data Source=DESKTOP-79E5E7Q\SQLEXPRESS;Initial Catalog= QLSTC;Integrated Security=false;User Id=sa;password=xyz@1234;Pooling=true;Max Pool Size=10000;Connection Timeout=100;" Microsoft.EntityFrameworkCore.SqlServer -o Models -c DomainDbContext -f
+
+
+docker build -f "Homes.API/Dockerfile" -t api-gis .
+docker run -d -p 8989:80 --name api-gis api-gis
+
+mkdir Template
+mkdir TemplateOutput
+docker cp Template_GCNQSDD.xlsx 57a679c8c744:/app/StaticFiles/Template
+docker cp Template_GPXD.xlsx 57a679c8c744:/app/StaticFiles/Template
+docker cp Template_NCCDMDSDD.xlsx 57a679c8c744:/app/StaticFiles/Template
+
+docker cp Template_BaoCaoHoSoTheoTungLoai.xlsx 57a679c8c744:/app/StaticFiles/Template
+docker cp Template_BaoCaoThuaDatDuocTimKiem.xlsx 57a679c8c744:/app/StaticFiles/Template
+docker cp Template_BaoCaoTiepNhanHoSo.xlsx 57a679c8c744:/app/StaticFiles/Template
