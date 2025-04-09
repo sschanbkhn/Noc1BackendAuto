@@ -59,10 +59,10 @@
 
   <ItemGroup>
     <Reference Include="Network.Core">
-      <HintPath>..\Network.Core\bin\Debug\net6.0\Network.Core.dll</HintPath>
+      <HintPath>..\Packages\Network.Core.dll</HintPath>
     </Reference>
     <Reference Include="Network.InfraCore">
-      <HintPath>..\Network.Infrastructure\bin\Debug\net6.0\Network.InfraCore.dll</HintPath>
+      <HintPath>..\Packages\Network.InfraCore.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

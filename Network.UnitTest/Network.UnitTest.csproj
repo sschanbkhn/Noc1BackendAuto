@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <Reference Include="Network.Core">
-      <HintPath>..\Network.Core\bin\Debug\net6.0\Network.Core.dll</HintPath>
+      <HintPath>..\Packages\Network.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
 
