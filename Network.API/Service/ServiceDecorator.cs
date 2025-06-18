@@ -90,6 +90,18 @@ namespace Network.API.Service
             {
                 _serviceBase = (IRepositoryBase<TEntity>)service.Net_NetworkLinks;
             }
+            else if (typeof(TEntity) == typeof(Model.Net_UC_LinhVuc))
+            {
+                _serviceBase = (IRepositoryBase<TEntity>)service.Net_UC_LinhVucs;
+            }
+            else if (typeof(TEntity) == typeof(Model.Net_UC_TrangThai))
+            {
+                _serviceBase = (IRepositoryBase<TEntity>)service.Net_UC_TrangThais;
+            }
+            else if (typeof(TEntity) == typeof(Model.NetUsecase_Run))
+            {
+                _serviceBase = (IRepositoryBase<TEntity>)service.NetUsecase_Runs;
+            }
             #endregion
         }
         public async Task<TEntity> SaveEntityAsync(TEntity entity)

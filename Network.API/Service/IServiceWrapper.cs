@@ -29,5 +29,8 @@ namespace Network.API.Service
         Net_HistoryCurenAlarm.IService Net_HistoryCurenAlarm { get; }
         Net_Manufacturers.IService Net_Manufacturers { get; }
         Net_NetworkLinks.IService Net_NetworkLinks { get; }
+        Net_UC_LinhVucs.IService Net_UC_LinhVucs { get; }
+        Net_UC_TrangThais.IService Net_UC_TrangThais { get; }
+        NetUsecase_Runs.IService NetUsecase_Runs { get; }
     }
 }

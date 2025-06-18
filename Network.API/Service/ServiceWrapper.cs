@@ -35,6 +35,9 @@ namespace Network.API.Service
         private Net_HistoryCurenAlarm.IService _net_historycurenalarm;
         private Net_Manufacturers.IService _net_manufacturers;
         private Net_NetworkLinks.IService _net_networklinks;
+        private Net_UC_LinhVucs.IService _net_uc_linhvuc;
+        private Net_UC_TrangThais.IService _net_uc_trangthai;
+        private NetUsecase_Runs.IService _netusecase_run;
 
         public ServiceWrapper(DomainDbContext context, IDateTimeProvider dateTimeProvider, IUserProvider userService, IConfiguration configuration)
         {
@@ -293,5 +296,42 @@ namespace Network.API.Service
                 return _net_networklinks;
             }
         }
+        public Net_UC_LinhVucs.IService Net_UC_LinhVucs
+        {
+            get
+            {
+                if (_net_uc_linhvuc == null)
+                {
+                    _net_uc_linhvuc = new Net_UC_LinhVucs.Service(_context, _dateTimeProvider, _userProvider);
+                }
+
+                return _net_uc_linhvuc;
+            }
+        }
+        public Net_UC_TrangThais.IService Net_UC_TrangThais
+        {
+            get
+            {
+                if (_net_uc_trangthai == null)
+                {
+                    _net_uc_trangthai = new Net_UC_TrangThais.Service(_context, _dateTimeProvider, _userProvider);
+                }
+
+                return _net_uc_trangthai;
+            }
+        }
+        public NetUsecase_Runs.IService NetUsecase_Runs
+        {
+            get
+            {
+                if (_netusecase_run == null)
+                {
+                    _netusecase_run = new NetUsecase_Runs.Service(_context, _dateTimeProvider, _userProvider);
+                }
+
+                return _netusecase_run;
+            }
+        }
+        
     }
 }

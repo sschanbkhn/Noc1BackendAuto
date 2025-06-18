@@ -40,7 +40,9 @@ namespace Network.API.Infrastructure
         public DbSet<Net_HistoryCurenAlarm> Net_HistoryCurenAlarm { get; set; }
         public DbSet<Net_Manufacturers> Net_Manufacturers { get; set; }
         public DbSet<Net_NetworkLinks> Net_NetworkLinks { get; set; }
-
+        public DbSet<Net_UC_LinhVuc> Net_UC_LinhVuc { get; set; }
+        public DbSet<Net_UC_TrangThai> Net_UC_TrangThai { get; set; }
+        public DbSet<NetUsecase_Run> NetUsecase_Run { get; set; }
         public DbSet<Sys_AuthToken> Sys_AuthTokens { get; set; }
         public DbSet<Sys_Category> Sys_Categories { get; set; }
         public DbSet<Sys_File> Sys_Files { get; set; }
