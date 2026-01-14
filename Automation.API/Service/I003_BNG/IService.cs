@@ -15,6 +15,6 @@ namespace Network.API.Service.I003_BNG
         Task<dynamic> GetDashboardDataAsync(DateTime? fromDate = null, DateTime? toDate = null);
         Task<List<dynamic>> GetLocationListAsync();
         Task<List<dynamic>> GetBNGDataByLocationAsync(string location, DateTime? reportDate = null);
-        Task<dynamic> GetSessionUserDashboardDataAsync(DateTime? fromDate = null, DateTime? toDate = null);
+        Task<dynamic> GetSessionUserDashboardDataAsync(DateTime? reportDate = null, string location = null);
     }
 }
