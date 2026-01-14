@@ -194,13 +194,13 @@ namespace Network.API.Controllers
         
         [HttpGet("GetSessionUserDashboardData")]
         [AuthorizeFilter]
-        public async Task<IActionResult> GetSessionUserDashboardData([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
+        public async Task<IActionResult> GetSessionUserDashboardData([FromQuery] DateTime? reportDate = null, [FromQuery] string location = null)
         {
             try
             {
-                _logger.LogInformation($"Call GetSessionUserDashboardData from {fromDate} to {toDate}");
+                _logger.LogInformation($"Call GetSessionUserDashboardData for date {reportDate}, location: {location}");
                 
-                var result = await _service.I003_BNG.GetSessionUserDashboardDataAsync(fromDate, toDate);
+                var result = await _service.I003_BNG.GetSessionUserDashboardDataAsync(reportDate, location);
                 return ResponseMessage.Success(result);
             }
             catch (Exception ex)

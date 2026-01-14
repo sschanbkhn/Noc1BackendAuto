@@ -533,140 +533,118 @@ namespace Network.API.Service.I003_BNG
             return results;
         }
         
-        public async Task<dynamic> GetSessionUserDashboardDataAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        public async Task<dynamic> GetSessionUserDashboardDataAsync(DateTime? reportDate = null, string location = null)
         {
             try
             {
                 using var connection = new NpgsqlConnection(_inocConnectionString);
                 await connection.OpenAsync();
 
-                var from = fromDate?.Date ?? DateTime.Today.Date;
-                var to = toDate?.Date ?? DateTime.Today.Date;
+                var date = reportDate?.Date ?? DateTime.Today.Date;
 
-                // Session đa phiên data (pie chart 1) - query dữ liệu thực từ bng_dashboard_daily
-                var sessionQuery = @"
-                    SELECT
-                      COALESCE(SUM(a.total_sessions), 0) AS TongSoSessionXacThuc,
-                      COALESCE(SUM(a.over_sessions), 0) AS SoSessionVuotPhien,
-                      COALESCE(SUM(a.cleared_sessions), 0) AS SoSessionDaXoa
-                    FROM inoc1_db_pppoe.bng_dashboard_daily a
-                    WHERE a.report_date >= @fromDate AND a.report_date <= @toDate";
-
-                var sessionData = new { TongSoSessionXacThuc = 0L, SoSessionVuotPhien = 0L, SoSessionDaXoa = 0L };
+                // Nếu location là null hoặc "all", lấy tổng của tất cả tỉnh
+                // Nếu location cụ thể, lấy dữ liệu chi tiết của tỉnh đó
                 
-                using (var cmd = new NpgsqlCommand(sessionQuery, connection))
+                string query;
+                NpgsqlCommand cmd;
+                var data = new List<dynamic>();
+                
+                if (string.IsNullOrEmpty(location) || location.ToLower() == "all")
                 {
-                    cmd.Parameters.AddWithValue("fromDate", from);
-                    cmd.Parameters.AddWithValue("toDate", to);
+                    // Lấy tổng toàn bộ tất cả tỉnh
+                    query = @"
+                        SELECT
+                          'TOTAL' AS location,
+                          COALESCE(SUM(a.total_users), 0) AS total_users,
+                          COALESCE(SUM(a.total_sessions), 0) AS total_sessions,
+                          COALESCE(SUM(a.limit_sessions), 0) AS limit_sessions,
+                          COALESCE(SUM(a.cleared_sessions), 0) AS cleared_sessions,
+                          COALESCE(SUM(a.cleared_users), 0) AS cleared_users,
+                          COALESCE(SUM(a.over_sessions), 0) AS over_sessions,
+                          COALESCE(SUM(a.over_users), 0) AS over_users,
+                          a.report_date
+                        FROM inoc1_db_pppoe.bng_dashboard_daily a
+                        WHERE a.report_date = @reportDate
+                        GROUP BY a.report_date";
                     
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            sessionData = new
-                            {
-                                TongSoSessionXacThuc = reader.IsDBNull(0) ? 0L : reader.GetInt64(0),
-                                SoSessionVuotPhien = reader.IsDBNull(1) ? 0L : reader.GetInt64(1),
-                                SoSessionDaXoa = reader.IsDBNull(2) ? 0L : reader.GetInt64(2)
-                            };
-                        }
-                    }
+                    cmd = new NpgsqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("reportDate", date);
                 }
-
-                // User đa phiên data (pie chart 2) - tạm thời sử dụng tỷ lệ từ session data
-                // Cần có table riêng cho user data hoặc logic tính toán khác
-                var userQuery = @"
-                    SELECT
-                      COALESCE(SUM(a.total_sessions), 0) * 0.6 AS TongSoUserXacThuc,
-                      COALESCE(SUM(a.over_sessions), 0) * 0.7 AS SoUserVuotPhien,
-                      COALESCE(SUM(a.cleared_sessions), 0) * 0.8 AS SoUserDaBiClear
-                    FROM inoc1_db_pppoe.bng_dashboard_daily a
-                    WHERE a.report_date >= @fromDate AND a.report_date <= @toDate";
-
-                var userData = new { TongSoUserXacThuc = 0L, SoUserVuotPhien = 0L, SoUserDaBiClear = 0L };
-                
-                using (var cmd = new NpgsqlCommand(userQuery, connection))
+                else
                 {
-                    cmd.Parameters.AddWithValue("fromDate", from);
-                    cmd.Parameters.AddWithValue("toDate", to);
+                    // Lấy dữ liệu chi tiết của tỉnh cụ thể
+                    query = @"
+                        SELECT
+                          b.""location"",
+                          a.id,
+                          a.bng_ip,
+                          a.total_users,
+                          a.total_sessions,
+                          a.limit_sessions,
+                          a.cleared_sessions,
+                          a.cleared_users,
+                          a.over_sessions,
+                          a.over_users,
+                          a.report_date,
+                          a.created_at
+                        FROM inoc1_db_pppoe.bng_dashboard_daily a
+                        INNER JOIN inoc1_db_pppoe.bng b ON a.bng_ip = b.bng_ip
+                        WHERE a.report_date = @reportDate AND b.""location"" = @location
+                        ORDER BY a.bng_ip";
                     
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            userData = new
-                            {
-                                TongSoUserXacThuc = reader.IsDBNull(0) ? 0L : Convert.ToInt64(reader.GetDecimal(0)),
-                                SoUserVuotPhien = reader.IsDBNull(1) ? 0L : Convert.ToInt64(reader.GetDecimal(1)),
-                                SoUserDaBiClear = reader.IsDBNull(2) ? 0L : Convert.ToInt64(reader.GetDecimal(2))
-                            };
-                        }
-                    }
+                    cmd = new NpgsqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("reportDate", date);
+                    cmd.Parameters.AddWithValue("location", location);
                 }
-
-                // Chart data - dữ liệu thực theo từng ngày từ bng_dashboard_daily
-
-                var chartData = new List<object>();
                 
-                var chartQuery = @"
-                    SELECT
-                      a.report_date,
-                      COALESCE(SUM(a.total_sessions), 0) AS XacThuc,
-                      COALESCE(SUM(a.over_sessions), 0) AS VuotPhien,
-                      COALESCE(SUM(a.cleared_sessions), 0) AS DaXoa
-                    FROM inoc1_db_pppoe.bng_dashboard_daily a
-                    WHERE a.report_date >= @fromDate AND a.report_date <= @toDate
-                    GROUP BY a.report_date
-                    ORDER BY a.report_date";
-                
-                using (var cmd = new NpgsqlCommand(chartQuery, connection))
+                using (var reader = await cmd.ExecuteReaderAsync())
                 {
-                    cmd.Parameters.AddWithValue("fromDate", from);
-                    cmd.Parameters.AddWithValue("toDate", to);
-                    
-                    using (var reader = await cmd.ExecuteReaderAsync())
+                    while (await reader.ReadAsync())
                     {
-                        while (await reader.ReadAsync())
+                        if (string.IsNullOrEmpty(location) || location.ToLower() == "all")
                         {
-                            chartData.Add(new
+                            data.Add(new
                             {
-                                Date = reader.GetDateTime("report_date").ToString("dd/MM"),
-                                XacThuc = reader.IsDBNull("XacThuc") ? 0L : reader.GetInt64("XacThuc"),
-                                VuotPhien = reader.IsDBNull("VuotPhien") ? 0L : reader.GetInt64("VuotPhien"),
-                                DaXoa = reader.IsDBNull("DaXoa") ? 0L : reader.GetInt64("DaXoa")
+                                location = reader.IsDBNull("location") ? null : reader.GetString("location"),
+                                total_users = reader.IsDBNull("total_users") ? 0L : reader.GetInt64("total_users"),
+                                total_sessions = reader.IsDBNull("total_sessions") ? 0L : reader.GetInt64("total_sessions"),
+                                limit_sessions = reader.IsDBNull("limit_sessions") ? 0L : reader.GetInt64("limit_sessions"),
+                                cleared_sessions = reader.IsDBNull("cleared_sessions") ? 0L : reader.GetInt64("cleared_sessions"),
+                                cleared_users = reader.IsDBNull("cleared_users") ? 0L : reader.GetInt64("cleared_users"),
+                                over_sessions = reader.IsDBNull("over_sessions") ? 0L : reader.GetInt64("over_sessions"),
+                                over_users = reader.IsDBNull("over_users") ? 0L : reader.GetInt64("over_users"),
+                                report_date = reader.IsDBNull("report_date") ? (DateTime?)null : reader.GetDateTime("report_date")
                             });
                         }
-                    }
-                }
-                
-                // Nếu không có dữ liệu, tạo dữ liệu trống cho các ngày trong khoảng
-                if (chartData.Count == 0)
-                {
-                    var currentDate = from;
-                    while (currentDate <= to)
-                    {
-                        chartData.Add(new
+                        else
                         {
-                            Date = currentDate.ToString("dd/MM"),
-                            XacThuc = 0L,
-                            VuotPhien = 0L,
-                            DaXoa = 0L
-                        });
-                        
-                        currentDate = currentDate.AddDays(1);
+                            data.Add(new
+                            {
+                                id = reader.IsDBNull("id") ? 0 : reader.GetInt32("id"),
+                                location = reader.IsDBNull("location") ? null : reader.GetString("location"),
+                                bng_ip = reader.IsDBNull("bng_ip") ? null : reader.GetString("bng_ip"),
+                                total_users = reader.IsDBNull("total_users") ? 0 : reader.GetInt32("total_users"),
+                                total_sessions = reader.IsDBNull("total_sessions") ? 0 : reader.GetInt32("total_sessions"),
+                                limit_sessions = reader.IsDBNull("limit_sessions") ? 0 : reader.GetInt32("limit_sessions"),
+                                cleared_sessions = reader.IsDBNull("cleared_sessions") ? 0 : reader.GetInt32("cleared_sessions"),
+                                cleared_users = reader.IsDBNull("cleared_users") ? 0 : reader.GetInt32("cleared_users"),
+                                over_sessions = reader.IsDBNull("over_sessions") ? 0 : reader.GetInt32("over_sessions"),
+                                over_users = reader.IsDBNull("over_users") ? 0 : reader.GetInt32("over_users"),
+                                report_date = reader.IsDBNull("report_date") ? (DateTime?)null : reader.GetDateTime("report_date"),
+                                created_at = reader.IsDBNull("created_at") ? (DateTime?)null : reader.GetDateTime("created_at")
+                            });
+                        }
                     }
                 }
 
                 var result = new
                 {
-                    SessionData = sessionData,
-                    UserData = userData,
-                    ChartData = chartData,
-                    FromDate = from,
-                    ToDate = to
+                    data = data,
+                    reportDate = date,
+                    location = string.IsNullOrEmpty(location) ? "ALL" : location
                 };
 
-                _logger.LogInformation($"Successfully retrieved session user dashboard data for period {from} to {to}");
+                _logger.LogInformation($"Successfully retrieved session user dashboard data for date {date}, location: {location}");
                 return result;
             }
             catch (Exception ex)
