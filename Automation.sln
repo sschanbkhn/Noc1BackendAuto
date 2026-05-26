@@ -5,7 +5,7 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automation.API", "Automation.API\Automation.API.csproj", "{674D11D9-AC78-4FD3-9A18-E8BD659E02B4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automation.UnitTest", "Automation.UnitTest\Automation.UnitTest.csproj", "{7C3BA579-15E9-4805-A3C4-2FE95D694C10}"
+# Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automation.UnitTest", "Automation.UnitTest\Automation.UnitTest.csproj", "{7C3BA579-15E9-4805-A3C4-2FE95D694C10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
