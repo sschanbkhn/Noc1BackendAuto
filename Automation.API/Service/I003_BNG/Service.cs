@@ -25,7 +25,7 @@ namespace Network.API.Service.I003_BNG
         private readonly ILogger<Service> _logger;
         private readonly string _inocConnectionString;
         // Mới — đọc từ config
-        private readonly IConfiguration _configuration;
+        // private readonly IConfiguration _configuration;
 
         public Service(DomainDbContext dbContext, IDateTimeProvider dateTimeProvider, IUserProvider userService, 
                       IConfiguration configuration, IHttpClientFactory httpClientFactory = null, ILogger<Service> logger = null)
@@ -133,8 +133,8 @@ namespace Network.API.Service.I003_BNG
                     // ServiceApiUrlInoc_ConnectionString
 
                     // Dùng trong method
-                    var ServiceApiUrlInoc_Connection_String = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
-                    var response = await httpClient.PostAsync($"{ServiceApiUrlInoc_ConnectionString}/api/clear_over_limit_one_bng/", content);
+                    var ServiceApiUrlInocConnectionString = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
+                    var response = await httpClient.PostAsync($"{ServiceApiUrlInocConnectionString}/api/clear_over_limit_one_bng/", content);
 
 
                     if (response.IsSuccessStatusCode)
@@ -187,8 +187,8 @@ namespace Network.API.Service.I003_BNG
                     // Make API call
                     // var response = await httpClient.PostAsync("http://10.155.43.203:8000/api/check_one_user/", content);
                     // Dùng trong method
-                    var ServiceApiUrlInoc_Connection_String = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
-                    var response = await httpClient.PostAsync($"{ServiceApiUrlInoc_ConnectionString}/api/check_one_user/", content);
+                    var ServiceApiUrlInocConnectionString = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
+                    var response = await httpClient.PostAsync($"{ServiceApiUrlInocConnectionString}/api/check_one_user/", content);
 
 
 
@@ -243,8 +243,8 @@ namespace Network.API.Service.I003_BNG
                     // Make API call
                     // var response = await httpClient.PostAsync("http://10.155.43.203:8000/api/clear_over_limit_one_user/", content);
                     // Dùng trong method
-                    var ServiceApiUrlInoc_Connection_String = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
-                    var response = await httpClient.PostAsync($"{ServiceApiUrlInoc_ConnectionString}/api/clear_over_limit_one_user/", content);
+                    var ServiceApiUrlInocConnectionString = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
+                    var response = await httpClient.PostAsync($"{ServiceApiUrlInocConnectionString}/api/clear_over_limit_one_user/", content);
 
 
 
@@ -300,8 +300,8 @@ namespace Network.API.Service.I003_BNG
                     // var response = await httpClient.PostAsync("http://10.155.43.203:8000/api/clear_all_one_user/", content);
 
                     // Dùng trong method
-                    var ServiceApiUrlInoc_Connection_String = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
-                    var response = await httpClient.PostAsync($"{ServiceApiUrlInoc_ConnectionString}/api/clear_all_one_user/", content);
+                    var ServiceApiUrlInocConnectionString = _configuration["ExternalServices:ServiceApiUrlInoc_Connection_String"];
+                    var response = await httpClient.PostAsync($"{ServiceApiUrlInocConnectionString}/api/clear_all_one_user/", content);
 
 
 
